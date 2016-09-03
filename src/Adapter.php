@@ -35,7 +35,7 @@ class Adapter implements CM\Adapter, CM\Adapter\ProgressListener
     /**
      * @var array
      */
-    protected $messages = [];
+    private $messages = [];
 
     /**
      * Adapter constructor.
@@ -88,8 +88,12 @@ class Adapter implements CM\Adapter, CM\Adapter\ProgressListener
             ],
         ]);
 
-        $this->messages[] = "ElasticsearchAdapter found " . $response['hits']['total'] . " objects for type " . $type;
-        return new \ArrayIterator($response['hits']['hits']);
+        if (isset($response['hits']) && is_array($response['hits'])) {
+            $this->messages[] = "ElasticsearchAdapter found " . $response['hits']['total'] ?: 0 . " objects for type " . $type;
+            return new \ArrayIterator($response['hits']['hits'] ?: []);
+        }
+        $this->messages[] = "ElasticsearchAdapter found 0 objects for type " . $type;
+        return new \ArrayIterator();
     }
 
     /**
@@ -197,7 +201,8 @@ class Adapter implements CM\Adapter, CM\Adapter\ProgressListener
      */
     public function afterObjectProcessed()
     {
-        if (count($this->currentBatch) >= $this->batchSize) {
+        $batchCount = isset($this->currentBatch['body']) ? count($this->currentBatch['body']) : 0;
+        if ($batchCount >= $this->batchSize) {
             $this->commit();
         }
     }
