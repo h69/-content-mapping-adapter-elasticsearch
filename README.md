@@ -14,12 +14,15 @@ Adapter for the elasticsearch-php client inside the [h69/content-mapping](https:
 ## Usage ##
 
 ```php
-use Elasticsearch\Client as ElasticsearchClient;
+use Elasticsearch\ClientBuilder;
 use H69\ContentMapping\Synchronizer;
 use H69\ContentMapping\Elasticsearch\Adapter as ElasticsearchAdapter;
 
+$elasticsearchClient = ClientBuilder::create()->build();
+$elasticsearchIndex = 'myIndex';
+
 $sourceAdapter = ...;
-$destinationAdapter = new ElasticsearchAdapter(new ElasticsearchClient($configArray));
+$destinationAdapter = new ElasticsearchAdapter($elasticsearchClient, $elasticsearchIndex);
 $typeToSynchronize = 'pages';
 
 $synchronizer = new Synchronizer($sourceAdapter, $destinationAdapter);
